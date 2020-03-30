@@ -1,0 +1,56 @@
+body {
+    font: sans-serif 15px;
+}
+main {
+    display: flex;
+}
+.inputs {
+    height: 100%;
+    padding: 20px 10px;
+    border-radius: 10px;
+    background: #eee;
+}
+label {
+    width: 120px;   
+}
+input[type="number"] {
+    width: 50px;
+    padding: 5px;
+    margin-left: 10px;
+    font-size: 14px;
+}
+input#buy {
+    width: 130px;
+}
+#submit {
+    width: 200px;
+    height: 30px;
+    margin-top: 20px;
+    background: hsl(210, 70%, 40%);
+    color: white;
+}
+
+#results {
+    background: #f4f4fb;
+}
+#results tr {
+    height: 45px;
+}
+#results tr.header {
+    height: 50px;
+}
+#results .pattern {
+    width: 110px;
+    text-align: center;
+}
+#results td {
+    width: 50px;
+    text-align: center;
+    white-space: pre-line;
+}
+#results td .min {
+    color: hsl(210, 80%, 30%);
+}
+#results td .max {
+    color: hsl(30, 80%, 30%);
+}
