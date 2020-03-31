@@ -7,7 +7,25 @@ function getInputs() {
     return values
 }
 
-// Patterns
+function setInputs(values) {
+    const inputs = document.querySelectorAll("input")
+    for (let i in inputs) {
+        const input = inputs[i]
+        const value = values[i]
+        if (value) {
+            input.value = value
+        }
+    }
+}
+
+function resetInputs() {
+    const inputs = document.querySelectorAll("input")
+    for (let input of inputs) {
+        input.value = ''
+    }
+}
+
+// Levels
 const BOT = -2
 const DEC = -1
 const NOR = 0
@@ -149,7 +167,7 @@ function create4UpPatterns(initialPrice) {
         combination[d+4] = INC
         combination[d+5] = null
 
-        let priceRanges = [[40, 90]]
+        let priceRanges = [[Math.floor(initialPrice * 0.4), Math.ceil(initialPrice * 0.9)]]
         if (combination[0] === NOR) {
             priceRanges[0] = [Math.floor(initialPrice * 0.9), Math.ceil(initialPrice * 1.4)];
         }
@@ -161,13 +179,11 @@ function create4UpPatterns(initialPrice) {
                 case NOR:
                     priceRanges.push([Math.floor(initialPrice * 0.9), Math.ceil(initialPrice * 1.4)]); break;
                 case INC:
-                    priceRanges.push([Math.floor(initialPrice * 1.4), Math.ceil(initialPrice * 2)]); break;
+                    priceRanges.push([Math.floor(initialPrice * 1.4), Math.ceil(initialPrice * 1.9)]); break;
                 case HIT:
                     priceRanges.push([Math.floor(initialPrice * 1.4), Math.ceil(initialPrice * 2)]); break;
                 case null:
-                    priceRanges.push([40, 90]); break;
-                default:
-                    console.log(d, combination[d])
+                    priceRanges.push([Math.floor(initialPrice * 0.4), Math.ceil(initialPrice * 0.9)]); break;
             }
         }
         patterns.push({ combination, priceRanges})
@@ -260,8 +276,16 @@ function renderPattern(pattern) {
     return row
 }
 (function() {
+    // load from save
+    const saved = localStorage.getItem('save')
+    if (saved) {
+        const values = saved.split(';')
+        setInputs(values)
+    }
     document.getElementById("submit").addEventListener('click', (e) => {
         const inputs = getInputs()
+        // save to localstorage
+        localStorage.setItem('save', inputs.join(";"))
         const [initialPrice, ...values] = inputs
         const wavePatterns = createWavePatterns(initialPrice)
         const decreasingPattern = createDecreasingPattern(initialPrice)
@@ -270,5 +294,10 @@ function renderPattern(pattern) {
         const patterns = [...wavePatterns, decreasingPattern, ...bigWavePatterns3, ...bigWavePatterns4]
         const matchedPatterns = expect(patterns, inputs)
         renderResults(matchedPatterns, inputs)
+    })
+    document.getElementById("reset").addEventListener('click', (e) => {
+        resetInputs()
+        const zeros = getInputs()
+        localStorage.setItem('save', zeros.join(";"))
     })
 })()

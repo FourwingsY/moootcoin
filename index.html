@@ -8,7 +8,7 @@
     <h1>무트코인으로 돈을 벌어보자!</h1>
     <main>
         <div class="inputs">
-            <label>산 가격<input id="buy" type="number" value=100 ></label>
+            <label id="buy">산 가격<input type="number" value=100 ></label>
             <div class="mon">
                 <h3>월요일</h3>
                 <label>오전<input type="number" ></label>
@@ -40,6 +40,7 @@
                 <label>오후<input type="number" ></label>
             </div>
             <button id="submit">예측하기</button>
+            <button id="reset">초기화</button>
         </div>
         <table id="results"></table>
     </main>
