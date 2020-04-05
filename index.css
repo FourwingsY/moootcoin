@@ -1,5 +1,10 @@
 body {
+    position: relative;
     font: sans-serif 15px;
+}
+h1 {
+    margin: 10px 0;
+    text-align: center;
 }
 main {
     display: flex;
@@ -66,9 +71,43 @@ input[type="number"] {
     text-align: center;
     white-space: pre-line;
 }
+#results th.pm,
+#results td.pm {
+    background-color: #eeeefa;
+}
 #results td .min {
     color: hsl(210, 80%, 30%);
 }
 #results td .max {
     color: hsl(30, 80%, 30%);
+}
+#results button {
+    width: 100px;
+    height: 30px;
+    background: hsl(210, 70%, 40%);
+    color: white;
+}
+
+@media only screen and (max-width: 600px) {
+    body {
+        margin: 0;
+    }
+    .inputs {
+        padding: 20px;
+        margin: 0 auto;
+    }
+    #results {
+        position: absolute;
+        top: 50px;
+        left: 0;
+        position: absolute;
+        font-size: 10px;
+        border-collapse: collapse;
+    }
+    #results tr {
+        height: 30px;
+    }
+    #results tr.header {
+        height: 25px;
+    }
 }

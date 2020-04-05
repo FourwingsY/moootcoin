@@ -239,28 +239,39 @@ function expect(patterns, inputs) {
 function renderResults(patterns, inputs) {
     const header = renderHeader(inputs)
     const rows = patterns.map(pattern => renderPattern(pattern)).join('')
-    document.getElementById("results").innerHTML = header + rows
+    const footer = renderFooter()
+    document.getElementById("results").innerHTML = header + rows + footer
 }
 function renderHeader(inputs) {
-    const header = `<tr class="header">
-        <th class="pattern">상승-하락 패턴</th>
-        <th>월요일 오전</th>
-        <th>월요일 오후</th>
-        <th>화요일 오전</th>
-        <th>화요일 오후</th>
-        <th>수요일 오전</th>
-        <th>수요일 오후</th>
-        <th>목요일 오전</th>
-        <th>목요일 오후</th>
-        <th>금요일 오전</th>
-        <th>금요일 오후</th>
-        <th>토요일 오전</th>
-        <th>토요일 오후</th>
+    const header = `
+    <tr class="header">
+        <th class="pattern" rowspan=2>상승-하락 패턴</th>
+        <th colspan="2">월요일</th>
+        <th colspan="2">화요일</th>
+        <th colspan="2">수요일</th>
+        <th colspan="2">목요일</th>
+        <th colspan="2">금요일</th>
+        <th colspan="2">토요일</th>
+    </tr>
+    <tr class="header">
+        <th class="am">오전</th>
+        <th class="pm">오후</th>
+        <th class="am">오전</th>
+        <th class="pm">오후</th>
+        <th class="am">오전</th>
+        <th class="pm">오후</th>
+        <th class="am">오전</th>
+        <th class="pm">오후</th>
+        <th class="am">오전</th>
+        <th class="pm">오후</th>
+        <th class="am">오전</th>
+        <th class="pm">오후</th>
     </tr>`
     const [initial, ...observed] = inputs
-    const inputCells = observed.map(v => `<th>${v || '?'}</th>`)
-    const inputsRow = `<tr class="user-input">
-        <th>${initial}</th>
+    const inputCells = observed.map((v, i) => `<th class="${i % 2 === 0 ? 'am' : 'pm'}">${v || '?'}</th>`)
+    const inputsRow = `
+    <tr class="user-input">
+        <th>관측값: ${initial}</th>
         ${inputCells.join('')}
     </tr>
     `
@@ -268,13 +279,28 @@ function renderHeader(inputs) {
 }
 function renderPattern(pattern) {
     const {combination, priceRanges} = pattern
-    const ranges = priceRanges.map(range => `<td><span class="min">${range[0]}</span>\n<span class="max">${range[1]}</span></td>`)
-    const row = `<tr class="row">
+    const ranges = priceRanges.map((range, i) => `
+    <td class="${i % 2 === 0 ? 'am' : 'pm'}">\
+        <span class="min">${range[0]}</span>
+        <span class="max">${range[1]}</span>
+    </td>
+    `)
+    const row = `
+    <tr class="row">
         <th class="pattern">${prettyPrint(combination)}</th>
         ${ranges.join('')}
     </tr>`
     return row
 }
+function renderFooter() {
+    const footer = `<tr><td colspan=13><button onclick="closeResults();">닫기</button></td></tr>`
+    return footer
+}
+function closeResults() {
+    const results = document.querySelector("#results")
+    results.innerHTML = ""
+}
+
 (function() {
     // load from save
     const saved = localStorage.getItem('save')
