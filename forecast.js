@@ -118,7 +118,7 @@ function getPriceRanges(initialPrice = 100, combination) {
 }
 
 // 하락형 패턴
-function createDecreasingPattern() {
+function createDecreasingPattern(initialPrice) {
     const combination = [DEC,DEC,DEC,DEC,DEC,DEC,DEC,DEC,DEC,DEC,DEC,DEC]
     let priceRanges = [calcPriceProportionl(initialPrice, [0.85, 0.90])]
     for (let d = 1; d < 12; d++) {
