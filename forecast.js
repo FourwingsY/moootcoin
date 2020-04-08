@@ -92,20 +92,26 @@ function getDayType(day, combination) {
     return 'KeepDecreasing'
 }
 
+function calcPriceProportionl(initialPrice = 100, range) {
+    return [ Math.floor(initialPrice * range[0]), Math.ceil(initialPrice * range[1]) ]
+}
+function calcPriceStaticDiff(prevPrices, range) {
+    return [ Math.floor(prevPrices[0] + range[0]), Math.ceil(prevPrices[1] + range[1]) ]
+}
 
 function getPriceRanges(initialPrice = 100, combination) {
     const priceRanges = []
     for(let d = 0; d < 12; d++){
         const dayType = getDayType(d, combination)
         if (dayType === 'Normal') {
-            priceRanges.push([Math.floor(initialPrice * 0.90), Math.ceil(initialPrice * 1.40)])
+            priceRanges.push(calcPriceProportionl(initialPrice, [0.90, 1.40]))
         }
         if (dayType === 'FirstDrop') {
-            priceRanges.push([Math.floor(initialPrice * 0.60), Math.ceil(initialPrice * 0.80)])
+            priceRanges.push(calcPriceProportionl(initialPrice, [0.60, 0.80]))
         }
         if (dayType === 'KeepDecreasing') {
             let yesterdayPrice = priceRanges[d - 1]
-            priceRanges.push([Math.floor(yesterdayPrice[0] - 10), Math.ceil(yesterdayPrice[1] - 4)])
+            priceRanges.push(calcPriceStaticDiff(yesterdayPrice, [-10, -4]))
         }
     }
     return priceRanges
@@ -114,10 +120,10 @@ function getPriceRanges(initialPrice = 100, combination) {
 // 하락형 패턴
 function createDecreasingPattern() {
     const combination = [DEC,DEC,DEC,DEC,DEC,DEC,DEC,DEC,DEC,DEC,DEC,DEC]
-    let priceRanges = [[85, 90]]
+    let priceRanges = [calcPriceProportionl(initialPrice, [0.85, 0.90])]
     for (let d = 1; d < 12; d++) {
         let yesterdayPrice = priceRanges[d - 1]
-        priceRanges.push([Math.floor(yesterdayPrice[0] - 6), Math.ceil(yesterdayPrice[1] - 2)])
+        priceRanges.push(calcPriceStaticDiff(yesterdayPrice, [-6, -2]))
     }
     return { combination, priceRanges }
 }
@@ -135,20 +141,20 @@ function create3UpPatterns(initialPrice) {
         for (let i = d+5; i < 12; i++) {
             combination[i] = BOT
         }
-        let priceRanges = [[85, 90]]
+        let priceRanges = [calcPriceProportionl(initialPrice, [0.85, 0.90])]
         for (let d = 1; d < 12; d++) {
             let yesterdayPrice = priceRanges[d - 1]
             switch(combination[d]) {
                 case DEC:
-                    priceRanges.push([Math.floor(yesterdayPrice[0] - 6), Math.ceil(yesterdayPrice[1] - 2)]); break;
+                    priceRanges.push(calcPriceStaticDiff(yesterdayPrice, [-6, -2])); break;
                 case NOR:
-                    priceRanges.push([Math.floor(initialPrice * 0.9), Math.ceil(initialPrice * 1.4)]); break;
+                    priceRanges.push(calcPriceProportionl(initialPrice, [0.90, 1.40])); break;
                 case INC:
-                    priceRanges.push([Math.floor(initialPrice * 1.4), Math.ceil(initialPrice * 2)]); break;
+                    priceRanges.push(calcPriceProportionl(initialPrice, [1.40, 2.00])); break;
                 case HIT:
-                    priceRanges.push([Math.floor(initialPrice * 2), Math.ceil(initialPrice * 6)]); break;
+                    priceRanges.push(calcPriceProportionl(initialPrice, [2.00, 6.00])); break;
                 case BOT:
-                    priceRanges.push([Math.floor(initialPrice * 0.4), Math.ceil(initialPrice * 0.9)]); break;
+                    priceRanges.push(calcPriceProportionl(initialPrice, [0.40, 0.90])); break;
             }
         }
         patterns.push({ combination, priceRanges})
@@ -167,23 +173,23 @@ function create4UpPatterns(initialPrice) {
         combination[d+4] = INC
         combination[d+5] = null
 
-        let priceRanges = [[Math.floor(initialPrice * 0.4), Math.ceil(initialPrice * 0.9)]]
+        let priceRanges = [calcPriceProportionl(initialPrice, [0.40, 0.90])]
         if (combination[0] === NOR) {
-            priceRanges[0] = [Math.floor(initialPrice * 0.9), Math.ceil(initialPrice * 1.4)];
+            priceRanges[0] = calcPriceProportionl(initialPrice, [0.90, 1.40]);
         }
         for (let d = 1; d < 12; d++) {
             const yesterdayPrice = priceRanges[d - 1]
             switch(combination[d]) {
                 case DEC:
-                    priceRanges.push([Math.floor(yesterdayPrice[0] - 6), Math.ceil(yesterdayPrice[1] - 2)]); break;
+                    priceRanges.push(calcPriceStaticDiff(yesterdayPrice, [-6, -2])); break;
                 case NOR:
-                    priceRanges.push([Math.floor(initialPrice * 0.9), Math.ceil(initialPrice * 1.4)]); break;
+                    priceRanges.push(calcPriceProportionl(initialPrice, [0.90, 1.40])); break;
                 case INC:
-                    priceRanges.push([Math.floor(initialPrice * 1.4), Math.ceil(initialPrice * 1.9)]); break;
+                    priceRanges.push(calcPriceProportionl(initialPrice, [1.40, 1.90])); break;
                 case HIT:
-                    priceRanges.push([Math.floor(initialPrice * 1.4), Math.ceil(initialPrice * 2)]); break;
+                    priceRanges.push(calcPriceProportionl(initialPrice, [1.40, 2.00])); break;
                 case null:
-                    priceRanges.push([Math.floor(initialPrice * 0.4), Math.ceil(initialPrice * 0.9)]); break;
+                    priceRanges.push(calcPriceProportionl(initialPrice, [0.40, 0.90])); break;
             }
         }
         patterns.push({ combination, priceRanges})
@@ -202,12 +208,12 @@ function prettyPrint(combination) {
 
     return combination.map(type => {
         switch(type) {
-            case NOR: return '―'
-            case INC: return '↗️'
-            case DEC: return '↘'
-            case HIT: return '⤒'
-            case BOT: return '⤓'
-            default: return '―'
+            case NOR: return '&#x2015;'
+            case INC: return '&#x2197;'
+            case DEC: return '&#x2198;'
+            case HIT: return '&#x203E;'
+            case BOT: return '&#xFF3F;'
+            default: return '&#x2015;'
         }
     }).join('')
 }

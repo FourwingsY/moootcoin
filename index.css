@@ -1,6 +1,7 @@
 body {
     position: relative;
-    font: sans-serif 15px;
+    font-family: -apple-system, sans-serif;
+    font-size: 15px;
 }
 h1 {
     margin: 10px 0;
