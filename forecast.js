@@ -285,10 +285,11 @@ function renderHeader(inputs) {
 }
 function renderPattern(pattern) {
     const {combination, priceRanges} = pattern
+    const maxValue = Math.max.apply(null, priceRanges.map(range => range[1]))
     const ranges = priceRanges.map((range, i) => `
-    <td class="${i % 2 === 0 ? 'am' : 'pm'}">\
+    <td class="${i % 2 === 0 ? 'am' : 'pm'} ${maxValue === range[1] ? 'peak' : ''}">\
         <span class="min">${range[0]}</span>
-        <span class="max">${range[1]}</span>
+        <span class="max ${maxValue === range[1] ? 'peak' : ''}">${range[1]}</span>
     </td>
     `)
     const row = `

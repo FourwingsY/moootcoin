@@ -80,7 +80,14 @@ input[type="number"] {
     color: hsl(210, 80%, 30%);
 }
 #results td .max {
-    color: hsl(30, 80%, 30%);
+    color: hsl(30, 80%, 45%);
+}
+#results td.peak {
+    background-color: hsl(10, 50%, 90%);
+}
+#results td .peak {
+    color: hsl(10, 100%, 50%);
+    font-weight: 600;
 }
 #results button {
     width: 100px;
