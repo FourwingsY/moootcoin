@@ -32,9 +32,71 @@ const NOR = 0
 const INC = 1
 const HIT = 2
 
+function calcPriceProportionl(price = 100, range) {
+    return [ Math.floor(price * range[0]), Math.ceil(price * range[1]) ]
+}
+function calcPriceStaticDiff(prevPrices, range) {
+    return [ Math.floor(prevPrices[0] + range[0]), Math.ceil(prevPrices[1] + range[1]) ]
+}
 
 // 파도형 패턴
-function createWavePatterns(initialPrice) {
+function createWavePatterns(initialPrice, observedPrices) {
+    function isValidCombination(combination) {
+        // 하락장은 5번 온다
+        if (combination.filter(increase => increase).length > 7) {
+            return false
+        }
+        // 5연속 하락장은 없다
+        let firstDecrease = null
+        let lastDecrease = null
+        for (let i in combination) {
+            if (firstDecrease === null && combination[i] === DEC) {
+                firstDecrease = i
+            }
+            if (firstDecrease !== null && combination[i] === DEC) {
+                lastDecrease = i
+            }
+        }
+        if (lastDecrease - firstDecrease < 5) {
+            return false
+        }
+        return true
+    }
+    
+    function getDayType(day, combination) {
+        if (combination[day] === NOR) {
+            return 'Normal'
+        }
+        // decreasing.
+        if (day === 0) {
+            return 'FirstDrop'
+        }
+        if (combination[day - 1] === NOR) {
+            return 'FirstDrop'
+        }
+        return 'KeepDecreasing'
+    }
+
+    function getPriceRanges(initialPrice = 100, observedPrices, combination) {
+        const priceRanges = []
+        for(let d = 0; d < 12; d++){
+            const dayType = getDayType(d, combination)
+            if (dayType === 'Normal') {
+                priceRanges.push(calcPriceProportionl(initialPrice, [0.90, 1.40]))
+            }
+            if (dayType === 'FirstDrop') {
+                priceRanges.push(calcPriceProportionl(initialPrice, [0.60, 0.80]))
+            }
+            if (dayType === 'KeepDecreasing') {
+                const observed = observedPrices[d - 1]
+                const yesterdayPriceRange = observed ? [observed, observed] : priceRanges[d - 1]
+                priceRanges.push(calcPriceStaticDiff(yesterdayPriceRange, [-10, -4]))
+            }
+        }
+        return priceRanges
+    }
+
+    // 가격 패턴 생성
     const combinations = []
     for (let short = 0; short < 11; short++) {
         for (let long = 0; long < 10; long++) {
@@ -50,86 +112,27 @@ function createWavePatterns(initialPrice) {
         }
     }
 
+    // 패턴과 예측범위 계산하여 반환
     return combinations.map(combination => ({
         combination,
-        priceRanges: getPriceRanges(initialPrice, combination)
+        priceRanges: getPriceRanges(initialPrice, observedPrices, combination)
     }))
 }
 
-function isValidCombination(combination) {
-    // 하락장은 5번 온다
-    if (combination.filter(increase => increase).length > 7) {
-        return false
-    }
-    // 5연속 하락장은 없다
-    let firstDecrease = null
-    let lastDecrease = null
-    for (let i in combination) {
-        if (firstDecrease === null && combination[i] === DEC) {
-            firstDecrease = i
-        }
-        if (firstDecrease !== null && combination[i] === DEC) {
-            lastDecrease = i
-        }
-    }
-    if (lastDecrease - firstDecrease < 5) {
-        return false
-    }
-    return true
-}
-
-function getDayType(day, combination) {
-    if (combination[day] === NOR) {
-        return 'Normal'
-    }
-    // decreasing.
-    if (day === 0) {
-        return 'FirstDrop'
-    }
-    if (combination[day - 1] === NOR) {
-        return 'FirstDrop'
-    }
-    return 'KeepDecreasing'
-}
-
-function calcPriceProportionl(initialPrice = 100, range) {
-    return [ Math.floor(initialPrice * range[0]), Math.ceil(initialPrice * range[1]) ]
-}
-function calcPriceStaticDiff(prevPrices, range) {
-    return [ Math.floor(prevPrices[0] + range[0]), Math.ceil(prevPrices[1] + range[1]) ]
-}
-
-function getPriceRanges(initialPrice = 100, combination) {
-    const priceRanges = []
-    for(let d = 0; d < 12; d++){
-        const dayType = getDayType(d, combination)
-        if (dayType === 'Normal') {
-            priceRanges.push(calcPriceProportionl(initialPrice, [0.90, 1.40]))
-        }
-        if (dayType === 'FirstDrop') {
-            priceRanges.push(calcPriceProportionl(initialPrice, [0.60, 0.80]))
-        }
-        if (dayType === 'KeepDecreasing') {
-            let yesterdayPrice = priceRanges[d - 1]
-            priceRanges.push(calcPriceStaticDiff(yesterdayPrice, [-10, -4]))
-        }
-    }
-    return priceRanges
-}
-
 // 하락형 패턴
-function createDecreasingPattern(initialPrice) {
+function createDecreasingPattern(initialPrice, observedPrices) {
     const combination = [DEC,DEC,DEC,DEC,DEC,DEC,DEC,DEC,DEC,DEC,DEC,DEC]
     let priceRanges = [calcPriceProportionl(initialPrice, [0.85, 0.90])]
     for (let d = 1; d < 12; d++) {
-        let yesterdayPrice = priceRanges[d - 1]
-        priceRanges.push(calcPriceStaticDiff(yesterdayPrice, [-6, -2]))
+        const observed = observedPrices[d - 1]
+        const yesterdayPriceRange = observed ? [observed, observed] : priceRanges[d - 1]
+        priceRanges.push(calcPriceStaticDiff(yesterdayPriceRange, [-6, -2]))
     }
     return { combination, priceRanges }
 }
 
 // 3기 상승형 패턴
-function create3UpPatterns(initialPrice) {
+function create3UpPatterns(initialPrice, observedPrices) {
     const patterns = []
     for (let d = 1; d < 7; d++) {
         let combination = [DEC,DEC,DEC,DEC,DEC,DEC,DEC,DEC,DEC,DEC,DEC,DEC]
@@ -143,10 +146,11 @@ function create3UpPatterns(initialPrice) {
         }
         let priceRanges = [calcPriceProportionl(initialPrice, [0.85, 0.90])]
         for (let d = 1; d < 12; d++) {
-            let yesterdayPrice = priceRanges[d - 1]
             switch(combination[d]) {
                 case DEC:
-                    priceRanges.push(calcPriceStaticDiff(yesterdayPrice, [-6, -2])); break;
+                    const observed = observedPrices[d - 1]
+                    const yesterdayPriceRange = observed ? [observed, observed] : priceRanges[d - 1]
+                    priceRanges.push(calcPriceStaticDiff(yesterdayPriceRange, [-6, -2])); break;
                 case NOR:
                     priceRanges.push(calcPriceProportionl(initialPrice, [0.90, 1.40])); break;
                 case INC:
@@ -162,7 +166,7 @@ function create3UpPatterns(initialPrice) {
     return patterns
 }
 
-function create4UpPatterns(initialPrice) {
+function create4UpPatterns(initialPrice, observedPrices) {
     const patterns = []
     for (let d = 0; d < 8; d++) {
         let combination = [null,DEC,DEC,DEC,DEC,DEC,DEC,DEC,DEC,DEC,DEC,DEC]
@@ -178,10 +182,11 @@ function create4UpPatterns(initialPrice) {
             priceRanges[0] = calcPriceProportionl(initialPrice, [0.90, 1.40]);
         }
         for (let d = 1; d < 12; d++) {
-            const yesterdayPrice = priceRanges[d - 1]
             switch(combination[d]) {
                 case DEC:
-                    priceRanges.push(calcPriceStaticDiff(yesterdayPrice, [-6, -2])); break;
+                    const observed = observedPrices[d - 1]
+                    const yesterdayPriceRange = observed ? [observed, observed] : priceRanges[d - 1]
+                    priceRanges.push(calcPriceStaticDiff(yesterdayPriceRange, [-6, -2])); break;
                 case NOR:
                     priceRanges.push(calcPriceProportionl(initialPrice, [0.90, 1.40])); break;
                 case INC:
@@ -319,11 +324,11 @@ function closeResults() {
         const inputs = getInputs()
         // save to localstorage
         localStorage.setItem('save', inputs.join(";"))
-        const [initialPrice, ...values] = inputs
-        const wavePatterns = createWavePatterns(initialPrice)
-        const decreasingPattern = createDecreasingPattern(initialPrice)
-        const bigWavePatterns3 = create3UpPatterns(initialPrice)
-        const bigWavePatterns4 = create4UpPatterns(initialPrice)
+        const [initialPrice, ...observedPrices] = inputs
+        const wavePatterns = createWavePatterns(initialPrice, observedPrices)
+        const decreasingPattern = createDecreasingPattern(initialPrice, observedPrices)
+        const bigWavePatterns3 = create3UpPatterns(initialPrice, observedPrices)
+        const bigWavePatterns4 = create4UpPatterns(initialPrice, observedPrices)
         const patterns = [...wavePatterns, decreasingPattern, ...bigWavePatterns3, ...bigWavePatterns4]
         const matchedPatterns = expect(patterns, inputs)
         renderResults(matchedPatterns, inputs)
