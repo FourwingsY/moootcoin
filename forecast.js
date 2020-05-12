@@ -134,7 +134,7 @@ function createDecreasingPattern(initialPrice, observedPrices) {
 // 3기 상승형 패턴
 function create3UpPatterns(initialPrice, observedPrices) {
     const patterns = []
-    for (let d = 1; d < 7; d++) {
+    for (let d = 1; d < 8; d++) {
         let combination = [DEC,DEC,DEC,DEC,DEC,DEC,DEC,DEC,DEC,DEC,DEC,DEC]
         combination[d] = NOR
         combination[d+1] = INC
